@@ -409,6 +409,44 @@ body.scrolled .site-header {
   opacity: 0.07;
   pointer-events: none;
 }
+.cuilv-card {
+  display: flex;
+  flex-direction: column;
+  --c: #a95532;
+  --c-deep: #8f4427;
+}
+.cuilv-card::after {
+  opacity: 0.10;
+}
+.cuilv-card .btn-feature { margin-top: auto; }
+.cuilv-mark {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px auto 12px;
+  font-family: var(--serif);
+}
+.cuilv-mark span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--c-deep);
+  background: var(--paper-3);
+}
+.cuilv-mark span:nth-child(2) {
+  transform: translateY(-8px);
+  border-color: var(--c);
+  color: var(--white);
+  background: var(--c);
+}
+.cuilv-points { margin-bottom: 20px; }
 .feature-top {
   position: relative;
   display: flex;
@@ -441,36 +479,6 @@ body.scrolled .site-header {
   position: relative;
   color: var(--muted);
   font-size: 12px;
-}
-.donut-wrap {
-  position: relative;
-  width: min(210px, 66%);
-  aspect-ratio: 1;
-  margin: 14px auto 6px;
-}
-.donut { width: 100%; height: 100%; transform: rotate(-90deg); }
-.donut circle { fill: none; stroke-width: 16; }
-.donut-track { stroke: var(--line-soft); }
-.donut-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-}
-.donut-center b {
-  font-family: var(--serif);
-  font-size: 47px;
-  font-weight: 600;
-  line-height: 1;
-}
-.donut-center span {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.12em;
-  color: var(--muted);
 }
 .feature-legend {
   display: grid;
@@ -1904,7 +1912,26 @@ body.scrolled .site-header {
           <div><b>100<small>g</small></b><span>营养标注</span></div>
         </div>
       </div>
-      <div id="feature-card" class="feature-card" aria-live="polite"></div>
+      <a href="cuilv.html" class="feature-card cuilv-card" aria-label="前往村驴菜谱，共 318 道家常菜">
+        <div class="feature-top">
+          <span>村驴菜谱 / CUNLV'S RECIPES</span>
+          <span>318 道</span>
+        </div>
+        <p class="feature-label">跟村驴老师学做菜 · 用量精确到克</p>
+        <h2>村驴菜谱</h2>
+        <p class="feature-sub">从招牌锅包肉到家常下饭菜，318 道保姆级教程，照着做零失败。</p>
+        <div class="cuilv-mark" aria-hidden="true">
+          <span>锅</span><span>包</span><span>肉</span>
+        </div>
+        <div class="feature-legend cuilv-points">
+          <div style="--dot:#B5523B"><i aria-hidden="true"></i><div><b>318</b><span>道菜谱</span></div></div>
+          <div style="--dot:#B67A2E"><i aria-hidden="true"></i><div><b>克</b><span>精确用料</span></div></div>
+          <div style="--dot:#3F7258"><i aria-hidden="true"></i><div><b>视频</b><span>B站教程</span></div></div>
+        </div>
+        <span class="btn btn-feature">
+          去看看村驴菜谱 <span aria-hidden="true">→</span>
+        </span>
+      </a>
     </div>
   </section>
 
@@ -2168,68 +2195,6 @@ body.scrolled .site-header {
 
   const fmt1 = (value) => Number(value).toFixed(1);
   const pad = (value) => String(value).padStart(2, "0");
-
-  /* ---------------------------------------------------------------
-     Featured recipe
-     --------------------------------------------------------------- */
-  function renderFeature() {
-    const recipe = recipeMap.get(DATA.featured);
-    const cat = catById.get(recipe.categoryId);
-    const p = recipe.nutrition.per100;
-    const cal = {
-      carb: p.carb * 4,
-      protein: p.protein * 4,
-      fat: p.fat * 9,
-    };
-    const total = cal.carb + cal.protein + cal.fat;
-    const circumference = 2 * Math.PI * 78;
-    const segments = [
-      { label: "碳水", value: p.carb, calories: cal.carb, color: "#C49A4A" },
-      { label: "蛋白质", value: p.protein, calories: cal.protein, color: "#3F7258" },
-      { label: "脂肪", value: p.fat, calories: cal.fat, color: "#B5523B" },
-    ];
-    let offset = 0;
-    const circles = segments.map((segment) => {
-      const length = total > 0 ? (segment.calories / total) * circumference : 0;
-      const circle = `<circle cx="95" cy="95" r="78" stroke="${segment.color}" stroke-dasharray="${length.toFixed(2)} ${(circumference - length).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}"></circle>`;
-      offset += length;
-      return circle;
-    }).join("");
-
-    const card = $("#feature-card");
-    card.style.setProperty("--c", cat.color);
-    card.style.setProperty("--c-deep", cat.deep);
-    card.innerHTML = `
-      <div class="feature-top">
-        <span>今日推荐 / TODAY'S PICK</span>
-        <span>${escapeHTML(cat.en)} · 01</span>
-      </div>
-      <p class="feature-label">${escapeHTML(cat.name)} · ${escapeHTML(recipe.subcategory)} · ${p.kcal} kcal / 100g</p>
-      <h2>${escapeHTML(recipe.title)}</h2>
-      <p class="feature-sub">${escapeHTML(recipe.subtitle)}</p>
-      <div class="donut-wrap">
-        <svg class="donut" viewBox="0 0 190 190" role="img" aria-label="${escapeHTML(recipe.title)}每100克：热量${p.kcal}千卡，碳水${fmt1(p.carb)}克，蛋白质${fmt1(p.protein)}克，脂肪${fmt1(p.fat)}克">
-          <circle class="donut-track" cx="95" cy="95" r="78"></circle>
-          ${circles}
-        </svg>
-        <div class="donut-center">
-          <b>${p.kcal}</b>
-          <span>KCAL / 100 G</span>
-        </div>
-      </div>
-      <div class="feature-legend">
-        ${segments.map((segment, index) => `
-          <div style="--dot:${segment.color}">
-            <i aria-hidden="true"></i>
-            <div><b>${fmt1(segment.value)}</b><span>${segment.label} · g</span></div>
-          </div>
-        `).join("")}
-      </div>
-      <button class="btn btn-feature" type="button" data-open="${recipe.id}">
-        查看配料与做法 <span aria-hidden="true">→</span>
-      </button>
-    `;
-  }
 
   /* ---------------------------------------------------------------
      Recipe sections and cards
@@ -2740,7 +2705,6 @@ body.scrolled .site-header {
   }
 
   function init() {
-    renderFeature();
     renderSections();
     updateMetaCounts();
     renderSubfilters();
